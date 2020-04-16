@@ -621,13 +621,16 @@ Module["onRuntimeInitialized"] = function onRuntimeInitialized() {
     * @memberof module:SqlJs
     * Open a new database either by creating a new one or opening an existing
     * one stored in the byte array passed in first argument
-    * @param {number[]} data An array of bytes representing
-    * an SQLite database file
+    * @param {number[] or string} dataOrURL An array of bytes representing
+    * an SQLite database file or a URL of a remote file
     */
-    function Database(data) {
+    function Database(dataOrURL) {
         this.filename = "dbfile_" + (0xffffffff * Math.random() >>> 0);
-        if (data != null) {
-            FS.createDataFile("/", this.filename, data, true, true);
+        if (typeof dataOrURL == "String") {
+            // URL
+            FS.createLazyFile('/', this.filename, dataOrURL, true, true);
+        } else if (data != null) {
+            FS.createDataFile("/", this.filename, dataOrURL, true, true);
         }
         this.handleError(sqlite3_open(this.filename, apiTemp));
         this.db = getValue(apiTemp, "i32");
